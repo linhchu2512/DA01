@@ -19,6 +19,12 @@ having count(skill = 3)
 order by candidate_id;
 
 --Ex6:
+SELECT user_id,
+date(max(post_date)) - date(min(post_date)) as days_between
+FROM posts
+where post_date between '2021-01-01' and '2022-01-01'
+group by user_id
+having count(post_id) >= 2;
 
 --Ex7:
 SELECT card_name, max (issued_amount)-min (issued_amount) as Difference
