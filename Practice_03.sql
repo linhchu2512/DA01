@@ -17,3 +17,11 @@ group by manufacturer
 order by sum(total_sales) desc, manufacturer;
 
 --Ex4:
+SELECT extract (month from submit_date) as mth,
+product_id as product,
+round(cast((avg(stars)) as decimal),2) as avg_stars
+FROM reviews
+group by extract (month from submit_date), product_id
+order by mth, product_id;
+
+--Ex5:
