@@ -46,4 +46,16 @@ where activity_date between dateadd(day,-30,2019-07-27) and '2019-07-27'
 group by activity_date;
 
 --Ex8:
+select count (id) as number_employee from employees
+where extract(month from joining_date) between 1 and 7
+and extract(year from joining_date)=2022;
 
+--Ex9:
+select position ('a' in first_name) as position_of_a
+from worker
+where first_name = 'Amitah';
+
+--Ex10:
+select substring(title,length(winery)+2,4) as year
+from winemag_p2
+where country = 'Macedonia';
