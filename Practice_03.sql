@@ -25,3 +25,15 @@ group by extract (month from submit_date), product_id
 order by mth, product_id;
 
 --Ex5:
+select sender_id,
+count(message_id) as message_count
+from messages
+where extract(month from sent_date)=8
+and extract(year from sent_date)=2022
+group by sender_id
+order by message_count DESC
+limit 2;
+
+--Ex6:
+select tweet_id from tweets
+where length(content)>15;
