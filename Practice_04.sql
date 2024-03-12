@@ -11,6 +11,9 @@ else 'No' end as triangle
 from Triangle;
 
 --Ex3:
+SELECT round(100 * count (call_category)/count(*),1) as call_percentage
+FROM callers
+where call_category is null or call_category = 'n/a' ;
 
 --Ex4:
 select name from customer
