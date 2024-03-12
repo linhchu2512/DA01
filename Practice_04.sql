@@ -14,4 +14,4 @@ from Triangle;
 
 --Ex4:
 select name from customer
-where referee_id <> 2;
+where referee_id <> 2 or referee_id is null;
