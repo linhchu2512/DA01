@@ -15,3 +15,14 @@ from Triangle;
 --Ex4:
 select name from customer
 where referee_id <> 2 or referee_id is null;
+
+--Ex5:
+select 
+case when pclass = 1 then 'first_class'
+when pclass = 2 then 'second_class'
+when pclass = 3 then 'third_class'
+end as category,
+sum(case when survived = 1 then 1 else 0 end) as survivors,
+sum(case when survived = 0 then 1 else 0 end) as non_survivors
+from titanic
+group by category;
