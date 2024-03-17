@@ -17,3 +17,11 @@ from activities as act JOIN age_breakdown as age
 on age.user_id = act.user_id
 where act.activity_type in ('open','send')
 group by age.age_bucket;
+
+--Ex4:
+SELECT cus.customer_id
+FROM customer_contracts as cus
+join products as pro on cus.product_id = pro.product_id
+group by cus.customer_id
+having count(distinct pro.product_category) = (select count (distinct product_category) from products)
+order by cus.customer_id;
