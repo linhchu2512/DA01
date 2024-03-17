@@ -25,3 +25,12 @@ join products as pro on cus.product_id = pro.product_id
 group by cus.customer_id
 having count(distinct pro.product_category) = (select count (distinct product_category) from products)
 order by cus.customer_id;
+
+--Ex5:
+select e1.employee_id, e1.name,
+count (e2.employee_id) as report_count, 
+round (avg (e2.age),0) as average_age
+from employees as e1 join employees as e2
+on e1.employee_id = e2.reports_to
+group by e1.employee_id
+order by employee_id;
