@@ -42,3 +42,9 @@ left join products on products.product_id = orders.product_id
 where month(orders.order_date) = 2 and year (orders.order_date) = 2020
 group by orders.product_id
 having sum(orders.unit) >= 100;
+
+--Ex7:
+SELECT pages.page_id FROM pages
+left join page_likes on pages.page_id = page_likes.page_id
+where page_likes.liked_date is null
+order by pages.page_id asc;
