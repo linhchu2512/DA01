@@ -34,3 +34,11 @@ from employees as e1 join employees as e2
 on e1.employee_id = e2.reports_to
 group by e1.employee_id
 order by employee_id;
+
+--Ex6:
+select products.product_name, orders.product_id,
+sum(orders.unit) from orders
+left join products on products.product_id = orders.product_id
+where month(orders.order_date) = 2 and year (orders.order_date) = 2020
+group by orders.product_id
+having sum(orders.unit) >= 100;
