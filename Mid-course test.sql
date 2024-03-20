@@ -43,3 +43,12 @@ join customer as cus on cus.address_id = a.address_id
 join payment as p on p.customer_id = cus.customer_id
 group by ci.city
 order by amount desc;
+
+--Ex8:
+select concat(ci.city,',',' ',co.country) as city_country, sum(p.amount) as amount
+from city as ci join country as co on co.country_id = ci.country_id
+join address as a on ci.city_id = a.city_id
+join customer as cus on cus.address_id = a.address_id
+join payment as p on p.customer_id = cus.customer_id
+group by city_country
+order by amount desc;
