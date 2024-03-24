@@ -21,3 +21,7 @@ select count (policy_holder_id) as member_count
 from call_records;
 
 --Ex4:
+SELECT pages.page_id FROM pages
+left join page_likes on pages.page_id = page_likes.page_id
+where page_likes.liked_date is null
+order by pages.page_id asc;
