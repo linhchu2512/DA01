@@ -67,3 +67,18 @@ group by customer_id
 having count (distinct product_key) = (select count (product_key) from product);
 
 --Ex9:
+select employee_id from employees
+where manager_id not in (select employee_id from employees) and
+salary < 30000
+order by employee_id;
+
+--Ex10:
+with job_count as
+(select company_id, title, description, count(job_id) as job_count
+from job_listings
+group by company_id, title, description)
+select count(distinct company_id) as duplicate_companies
+from job_count
+where job_count > 1;
+
+--Ex11:
