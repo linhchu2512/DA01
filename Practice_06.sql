@@ -50,3 +50,20 @@ sum (amount) as trans_total_amount,
 sum (case when state = 'approved' then amount else 0 end) as approved_total_amount
 from transactions
 group by month,country;
+
+--Ex7:
+with first_year as (
+  select product_id, min (year) as first_year
+  from sales
+  group by product_id)
+select a.product_id, first_year.first_year, a.quantity,a.price
+from sales as a
+on a.product_id = first_year.product_id
+and a.year = first_year.first_year;
+
+--Ex8:
+select customer_id from customer
+group by customer_id
+having count (distinct product_key) = (select count (product_key) from product);
+
+--Ex9:
