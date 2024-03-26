@@ -98,6 +98,13 @@ union all
   and extract (month from created_date) = 2
   group by mr.movie_id,m.title
   order by avg(cast(mr.rating as decimal)) desc, m.title
-  limit 1) as table2
+  limit 1) as table2;
 
 --Ex12
+with cte as
+(select requester_id as id from RequestAccepted
+  union all accepter_id as id from RequestAccepted)
+select id, count(*) as num from cte
+group by id
+order by num desc
+limit 1;
