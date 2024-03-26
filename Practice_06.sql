@@ -82,3 +82,22 @@ from job_count
 where job_count > 1;
 
 --Ex11:
+select table1.results from
+  (select u.name as results
+from MovieRating as mr join users as u
+  on u.user_id = mr.user_id
+group by mr.user_id, u.name
+order by count(mr.user_id) desc, u.name
+limit 1) as table1
+union all
+  select table2.results
+(select m.title as results
+  from MovieRating as mr join movie as m
+  on m.movie_id = mr.movie_id
+  where extract (year from created_date) = 2020
+  and extract (month from created_date) = 2
+  group by mr.movie_id,m.title
+  order by avg(cast(mr.rating as decimal)) desc, m.title
+  limit 1) as table2
+
+--Ex12
