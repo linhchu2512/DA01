@@ -8,6 +8,19 @@ from job_count
 where job_count > 1;
 
 --Ex2:
+select * from (SELECT category,product,sum(spend) as total_spend
+from product_spend
+where category = 'appliance'
+group by category, product
+order by total_spend desc
+limit 2) as a
+UNION ALL
+select * from (SELECT category,product,sum(spend) as total_spend
+from product_spend
+where category = 'electronics'
+group by category, product
+order by total_spend desc
+limit 2) as b
 
 --Ex3:
 with call_records as (
