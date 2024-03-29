@@ -14,3 +14,13 @@ round(100*(curr_year_spend-lag(curr_year_spend) over(partition by product_id ord
 from twt_transaction
 
 --Ex2:
+with twt_monthly_card_issue AS
+(
+SELECT issue_month,issue_year,
+card_name,issued_amount,
+rank () over(partition by card_name order by issue_year,issue_month)
+FROM monthly_cards_issued)
+select card_name, issued_amount
+from twt_monthly_card_issue
+where rank = 1
+order by issued_amount desc;
