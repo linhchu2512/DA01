@@ -24,3 +24,13 @@ select card_name, issued_amount
 from twt_monthly_card_issue
 where rank = 1
 order by issued_amount desc;
+--Ex3:
+with twt_transactions as 
+(
+SELECT *,
+rank () over (partition by user_id order by transaction_date)
+FROM transactions
+)
+select user_id, spend, transaction_date
+from twt_transactions
+where rank = 3
