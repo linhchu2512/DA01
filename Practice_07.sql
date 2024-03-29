@@ -33,4 +33,20 @@ FROM transactions
 )
 select user_id, spend, transaction_date
 from twt_transactions
-where rank = 3
+where rank = 3;
+
+--Ex4:
+with twt_transactions AS
+(
+SELECT 
+transaction_date,
+user_id,
+count (product_id) over(partition by user_id order by transaction_date desc) as purchase_count,
+rank () over(partition by user_id order by transaction_date desc)
+FROM user_transactions
+)
+select distinct transaction_date, user_id,purchase_count
+from twt_transactions
+where rank = 1;
+
+--Ex5:
