@@ -50,3 +50,20 @@ from twt_transactions
 where rank = 1;
 
 --Ex5:
+with cte AS
+(
+SELECT *,
+lag (tweet_count) over (partition by user_id order by tweet_date) as lag1,
+lag (tweet_count,2) over (partition by user_id order by tweet_date) as lag2
+FROM tweets
+)
+select user_id, tweet_date,
+case 
+when lag1 is not null and lag2 is not null then round((tweet_count+lag1+lag2)/3.0,2)
+when lag1 is not null and lag2 is null then round((tweet_count+lag1)/2.0,2)
+when lag1 is null and lag2 is not null then round((tweet_count+lag2)/2.0,2)
+else round(tweet_count,2)
+end as rolling_avg_3d
+from cte;
+
+--Ex6:
