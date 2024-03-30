@@ -67,3 +67,20 @@ end as rolling_avg_3d
 from cte;
 
 --Ex6:
+
+--Ex7:
+with cte as 
+(
+select category, product,
+sum(spend) as total_spend,
+rank () over(partition by category order by sum(spend) desc) as rank
+from product_spend
+where extract(year from transaction_date) =2022
+group by category, product
+order by category, total_spend desc
+)
+select category, product, total_spend
+from cte 
+where rank <=2;
+
+--Ex8:
