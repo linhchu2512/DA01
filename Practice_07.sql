@@ -67,6 +67,17 @@ end as rolling_avg_3d
 from cte;
 
 --Ex6:
+with payments as 
+(
+SELECT merchant_id,
+transaction_timestamp - lag(transaction_timestamp)
+over (partition by merchant_id, credit_card_id,amount
+order by transaction_timestamp) as time_difference
+from transactions
+)
+select count(merchant_id) as payment_count
+from payments
+where time_difference <= '00:10:00';
 
 --Ex7:
 with cte as 
