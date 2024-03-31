@@ -84,3 +84,18 @@ from cte
 where rank <=2;
 
 --Ex8:
+with cte AS
+(
+SELECT a.artist_name,
+count(*),
+dense_rank() over(order by count(*) desc) as artist_rank
+FROM global_song_rank as g
+join songs as s on g.song_id = s.song_id
+join artists as a on s.artist_id = a.artist_id
+where rank <= 10
+group by(a.artist_name)
+order by count(*) desc
+)
+select artist_name,artist_rank
+from cte
+where artist_rank<=5;
