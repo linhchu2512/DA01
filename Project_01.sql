@@ -48,7 +48,7 @@ SET
    QTR_ID = extract(quarter from orderdate),
    MONTH_ID = extract(month from orderdate),
    YEAR_ID = extract(year from orderdate);
---5-Tìm oulier cho cột quantityorder:
+--5-Tìm oulier cho cột quantityordered:
 --Sử dụng Boxplot:
 with cte as
 (select Q1-1.5*IQR as min, Q3+1.5*IQR as max from
@@ -66,9 +66,12 @@ with cte as
 	select quantityordered,
 	(select avg(quantityordered) from public.sales_dataset_rfm_prj) as avg,
 	(select stddev(quantityordered) from public.sales_dataset_rfm_prj) as stddev
-	from public.sales_dataset_rfm_prj
-   )
-   
+	from public.sales_dataset_rfm_prj),
+cte_outliers as (
 select quantityordered, (quantityordered - avg)/stddev as z_score
 from cte
-where abs((quantityordered - avg)/stddev) > 3;
+where abs((quantityordered - avg)/stddev) > 3)
+
+--Xóa giá trị outliers
+DELETE from public.sales_dataset_rfm_prj
+where quantityordered in (select quantityordered from cte_outliers);
