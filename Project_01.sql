@@ -49,3 +49,26 @@ SET
    MONTH_ID = extract(month from orderdate),
    YEAR_ID = extract(year from orderdate);
 --5-Tìm oulier cho cột quantityorder:
+--Sử dụng Boxplot:
+with cte as
+(select Q1-1.5*IQR as min, Q3+1.5*IQR as max from
+(select
+  percentile_cont(0.25) within group (order by quantityordered) as Q1,
+  percentile_cont(0.75) within group (order by quantityordered) as Q3,
+  percentile_cont(0.75) within group (order by quantityordered)-percentile_cont(0.25) within group (order by quantityordered) as IQR
+from public.sales_dataset_rfm_prj) as temp)
+   
+select quantityordered from public.sales_dataset_rfm_prj
+where quantityordered < (select min from cte) or quantityordered > (select max from cte);
+--Sử dụng Z-score:
+with cte as
+(
+	select quantityordered,
+	(select avg(quantityordered) from public.sales_dataset_rfm_prj) as avg,
+	(select stddev(quantityordered) from public.sales_dataset_rfm_prj) as stddev
+	from public.sales_dataset_rfm_prj
+   )
+   
+select quantityordered, (quantityordered - avg)/stddev as z_score
+from cte
+where abs((quantityordered - avg)/stddev) > 3;
