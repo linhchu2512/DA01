@@ -18,6 +18,7 @@ ALTER TABLE public.sales_dataset_rfm_prj
 ADD COLUMN contactlastname VARCHAR(50),
 ADD COLUMN contactfirstname VARCHAR(50);
 --Điền thông tin vào cột mới tách từ contactfullname + viết hoa chữ cái đầu
+--Cách 1:
 UPDATE public.sales_dataset_rfm_prj
 SET
    contactlastname = upper(left(left(contactfullname,position('-' in contactfullname)-1),1))
@@ -26,3 +27,25 @@ SET
    contactfirstname = upper(left(right(contactfullname,length(contactfullname)-position('-' in contactfullname)),1))
                       ||
                       lower(right(right(contactfullname,length(contactfullname)-position('-' in contactfullname)),length(right(contactfullname,length(contactfullname)-position('-' in contactfullname)))-1));
+--Cách 2:
+UPDATE public.sales_dataset_rfm_prj
+SET
+   contactlastname = left(contactfullname,position('-' in contactfullname)-1),
+   contactfirstname = right(contactfullname,length(contactfullname)-position('-' in contactfullname));
+UPDATE public.sales_dataset_rfm_prj
+SET
+   contactlastname = INITCAP(contactlastname),
+   contactfirstname = INITCAP(contactfirstname);
+--4-Thêm cột quar,month,year:
+--Thêm cột
+ALTER TABLE public.sales_dataset_rfm_prj
+ADD COLUMN QTR_ID int,
+ADD COLUMN MONTH_ID int,
+ADD COLUMN YEAR_ID int;
+--Điền thông tin
+UPDATE public.sales_dataset_rfm_prj
+SET
+   QTR_ID = extract(quarter from orderdate),
+   MONTH_ID = extract(month from orderdate),
+   YEAR_ID = extract(year from orderdate);
+--5-Tìm oulier cho cột quantityorder:
