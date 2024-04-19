@@ -159,4 +159,4 @@ join bigquery-public-data.thelook_ecommerce.products as b on a.product_id = b.id
 where a.status = 'Complete' and
 a.delivered_at between '2022-01-15' and '2022-04-16'
 group by 1,2
-order by dates,revenue desc
+order by dates, revenue desc
