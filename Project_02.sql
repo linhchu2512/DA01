@@ -43,37 +43,86 @@ order by 1
 
 ----3. Nhóm khách hàng theo độ tuổi
 ----Tìm các khách hàng có trẻ tuổi nhất và lớn tuổi nhất theo từng giới tính ( Từ 1/2019-4/2022)
+--Cách 1:
 --KH nam nhỏ tuổi nhất
-select * from (select first_name,last_name,gender,age
+with young_old_age as
+(select * from (select first_name,last_name,gender,
+(select min(age) from bigquery-public-data.thelook_ecommerce.users) as age
 from bigquery-public-data.thelook_ecommerce.users
 where gender = 'M'
-and age = (select min(age) from bigquery-public-data.thelook_ecommerce.users)
-and created_at between '2019-01-01'and '2022-05-01')
+and created_at between '2019-01-01'and '2022-05-01'
+and age in (select min(age) from bigquery-public-data.thelook_ecommerce.users))
   
 union all
 --KH nam lớn tuổi nhất
-select * from (select first_name,last_name,gender,age
+select * from (select first_name,last_name,gender,
+(select max(age) from bigquery-public-data.thelook_ecommerce.users) as age
 from bigquery-public-data.thelook_ecommerce.users
 where gender = 'M'
-and age = (select max(age) from bigquery-public-data.thelook_ecommerce.users)
-and created_at between '2019-01-01'and '2022-05-01')
+and created_at between '2019-01-01'and '2022-05-01'
+and age in (select max(age) from bigquery-public-data.thelook_ecommerce.users))
   
 union all
 --KH nữ nhỏ tuổi nhất
-select * from (select first_name,last_name,gender,age
+select * from (select first_name,last_name,gender,
+(select min(age) from bigquery-public-data.thelook_ecommerce.users) as age
 from bigquery-public-data.thelook_ecommerce.users
 where gender = 'F'
-and age = (select min(age) from bigquery-public-data.thelook_ecommerce.users)
-and created_at between '2019-01-01'and '2022-05-01')
+and created_at between '2019-01-01'and '2022-05-01'
+and age in (select min(age) from bigquery-public-data.thelook_ecommerce.users))
 
 union all
 --KH nữ lớn tuổi nhất
-select * from (select first_name,last_name,gender,age
+select * from (select first_name,last_name,gender,
+(select max(age) from bigquery-public-data.thelook_ecommerce.users) as age
 from bigquery-public-data.thelook_ecommerce.users
 where gender = 'F'
-and age = (select max(age) from bigquery-public-data.thelook_ecommerce.users)
-and created_at between '2019-01-01'and '2022-05-01')
+and created_at between '2019-01-01'and '2022-05-01'
+and age in (select max(age) from bigquery-public-data.thelook_ecommerce.users))),
+--gắn tag
+young_old_age_tag as (
+select *,
+   case when age = (select min(age) from young_old_age where gender = 'M') then 'youngest'
+        when age = (select min(age) from young_old_age where gender = 'F') then 'youngest'
+        when age = (select max(age) from young_old_age where gender = 'M') then 'oldest'
+        when age = (select max(age) from young_old_age where gender = 'F') then 'oldest'
+   end as tag
+from young_old_age
+)
+--đếm số KH lớn tuổi và nhỏ tuổi nhất
+select gender, tag, age, count (*) as user_count 
+from young_old_age_tag
+group by gender, tag, age;
 
+--Cách 2:
+with young_old_age as
+(select first_name, last_name, gender,
+min (age) over (partition by gender) as age
+from bigquery-public-data.thelook_ecommerce.users 
+where created_at between '2019-01-01'and '2022-05-01'
+and age in (select min(age) from bigquery-public-data.thelook_ecommerce.users)
+union all
+select first_name, last_name, gender,
+max (age) over (partition by gender) as age
+from bigquery-public-data.thelook_ecommerce.users
+where created_at between '2019-01-01'and '2022-05-01'
+and age in (select max (age) from bigquery-public-data.thelook_ecommerce.users)),
+young_old_age_tag as (
+select *,
+   case when age in (select min(age) from young_old_age where gender = 'M') then 'youngest'
+        when age in (select min(age) from young_old_age where gender = 'F') then 'youngest'
+        else 'oldest'
+   end as tag
+from young_old_age
+)
+select gender, tag, age, count (*) as user_count 
+from young_old_age_tag
+group by gender, tag, age;
 
+/* Nhận xét:
+- Giới tính nữ: trẻ nhất là 12 tuổi (524 người dùng), già nhất là 70 tuổi (544 người dùng)
+- Giới tính nam: trẻ nhất là 12 tuổi (535 người dùng), già nhất là 70 tuổi (501 người dùng)
+*/
 
-
+----4.Top 5 sản phẩm mỗi tháng.
+----Thống kê top 5 sản phẩm có lợi nhuận cao nhất từng tháng (xếp hạng cho từng sản phẩm).
