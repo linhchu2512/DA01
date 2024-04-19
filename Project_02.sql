@@ -126,3 +126,37 @@ group by gender, tag, age;
 
 ----4.Top 5 sản phẩm mỗi tháng.
 ----Thống kê top 5 sản phẩm có lợi nhuận cao nhất từng tháng (xếp hạng cho từng sản phẩm).
+With product_profit as
+(
+Select 
+CAST(FORMAT_DATE('%Y-%m', a.delivered_at) AS STRING) as month_year,
+a.product_id as product_id,
+b.name as product_name,
+round(sum(a.sale_price),2) as sales,
+round(sum(b.cost),2) as cost,
+round (round(sum(a.sale_price)-sum(b.cost),2),2)  as profit
+from bigquery-public-data.thelook_ecommerce.order_items as a
+Join bigquery-public-data.thelook_ecommerce.products as b on a.product_id=b.id
+Where a.status='Complete'
+Group by 1,2,3
+)
+Select * from
+(select *,
+dense_rank() OVER ( PARTITION BY month_year ORDER BY month_year,profit) as rank
+from product_profit
+) as rank_table
+Where rank_table.rank<=5
+order by rank_table.month_year
+
+----5.Doanh thu tính đến thời điểm hiện tại trên mỗi danh mục
+----Thống kê tổng doanh thu theo ngày của từng danh mục sản phẩm (category) trong 3 tháng qua ( giả sử ngày hiện tại là 15/4/2022)
+select
+cast (format_date('%Y-%m-%d',a.delivered_at) as string) as dates,
+b.category as product_categories,
+round (sum(a.sale_price),2) as revenue
+from bigquery-public-data.thelook_ecommerce.order_items as a
+join bigquery-public-data.thelook_ecommerce.products as b on a.product_id = b.id
+where a.status = 'Complete' and
+a.delivered_at between '2022-01-15' and '2022-04-16'
+group by 1,2
+order by dates,revenue desc
