@@ -167,13 +167,13 @@ with cte as (
 select
 format_date ('%Y-%m',a.created_at) as Month,
 format_date ('%Y',a.created_at) as Year,
-b.category as Product_category,
-round (sum (c.sale_price),2) as TPV,
-count (c.order_id) as TPO,
-round (sum (b.cost),2) as Total_cost
+c.category as Product_category,
+round (sum (b.sale_price),2) as TPV,
+count (b.order_id) as TPO,
+round (sum (c.cost),2) as Total_cost
 from bigquery-public-data.thelook_ecommerce.orders as a
-join bigquery-public-data.thelook_ecommerce.products as b on a.order_id = b.id
-join bigquery-public-data.thelook_ecommerce.order_items as c on b.id = c.id
+join bigquery-public-data.thelook_ecommerce.order_items as b on a.order_id = b.order_id
+join bigquery-public-data.thelook_ecommerce.products as c on c.id = b.product_id
 group by 1,2,3
 )
 select Month, Year, Product_category, TPV, TPO,
