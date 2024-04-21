@@ -1,14 +1,14 @@
 /*Ecommerce Dataset: Exploratory Data Analysis (EDA) and Cohort Analysis in SQL
---Tổng quan về dữ liệu
+-- Tổng quan về dữ liệu
 TheLook là một trang web thương mại điện tử về quần áo. Tập dữ liệu chứa thông tin về customers, products, orders, logistics, web events , digital marketing campaigns.
---Các bảng:
-distribution_centers: ghi lại tên kinh độ, vĩ độ của các trung tâm pp
-events: ghi lại các sự kiện
-inventory_items: ghi lại thông tin các item tồn kho (id, tên, brand, cost, giá bán)
-order_items : ghi lại danh sách các mặt hàng đã mua trong mỗi order ID..
-orders : ghi lại tất cả các đơn hàng mà khách hàng đã đặt
-products : ghi lại chi tiết các sản phẩm được bán trên The Look, bao gồm price, brand, & product categories
-users: toàn bộ thông tin người dùng */
+-- Các bảng:
+- distribution_centers: ghi lại tên kinh độ, vĩ độ của các trung tâm pp
+- events: ghi lại các sự kiện
+- inventory_items: ghi lại thông tin các item tồn kho (id, tên, brand, cost, giá bán)
+- order_items : ghi lại danh sách các mặt hàng đã mua trong mỗi order ID..
+- orders : ghi lại tất cả các đơn hàng mà khách hàng đã đặt
+- products : ghi lại chi tiết các sản phẩm được bán trên The Look, bao gồm price, brand, & product categories
+- users: toàn bộ thông tin người dùng */
 
 --I. Ad-hoc tasks
 ----1. Số lượng đơn hàng và số lượng khách hàng mỗi tháng
@@ -160,3 +160,29 @@ where a.status = 'Complete' and
 a.delivered_at between '2022-01-15' and '2022-04-16'
 group by 1,2
 order by dates, revenue desc
+
+--II. Tạo metric trước khi dựng dashboard
+----1. Yêu cầu tạo dataset:
+with cte as (
+select
+format_date ('%Y-%m',a.created_at) as Month,
+format_date ('%Y',a.created_at) as Year,
+b.category as Product_category,
+round (sum (c.sale_price),2) as TPV,
+count (c.order_id) as TPO,
+round (sum (b.cost),2) as Total_cost
+from bigquery-public-data.thelook_ecommerce.orders as a
+join bigquery-public-data.thelook_ecommerce.products as b on a.order_id = b.id
+join bigquery-public-data.thelook_ecommerce.order_items as c on b.id = c.id
+group by 1,2,3
+)
+select Month, Year, Product_category, TPV, TPO,
+round(100.00*cast ((TPV - lag (TPV) over (partition by Product_category order by Year, Month))/lag (TPV) over (partition by Product_category order by Year, Month) as decimal),2)||'%' as Revenue_growth,
+round(100.00*cast ((TPO - lag (TPO) over (partition by Product_category order by Year, Month))/lag (TPO) over (partition by Product_category order by Year, Month) as decimal),2)||'%' as Order_growth,
+Total_cost,
+round (TPV-Total_cost,2) as Total_profit,
+round (100.00*round (TPV-Total_cost,2)/Total_cost,2)||'%' as Profit_to_cost_ratio
+from cte
+order by Product_category, Year, Month
+
+----2. Tạo retention cohort analysis:
