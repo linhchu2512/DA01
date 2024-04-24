@@ -186,3 +186,50 @@ from cte
 order by Product_category, Year, Month
 
 ----2. Tạo retention cohort analysis:
+with cte1 as (
+select user_id,round (sale_price,2) as amount,
+format_date ('%Y-%m',first_purchase_date) as cohort_month,
+created_at,
+(extract (year from created_at)-extract (year from first_purchase_date))*12 + 
+extract (month from created_at)-extract (month from first_purchase_date) + 1 as index
+from (
+select user_id,
+sale_price,
+min (created_at) over (partition by user_id) as first_purchase_date,
+created_at
+from bigquery-public-data.thelook_ecommerce.order_items
+where status = 'Complete') as t ),
+cte2 as (
+select cohort_month,
+index,
+count (distinct user_id) as user_count,
+sum (amount) as revenue
+from cte1
+group by cohort_month, index
+order by index),
+customer_cohort as (
+select cohort_month,
+sum (case when index = 1 then user_count else 0 end) as t1,
+sum (case when index = 2 then user_count else 0 end) as t2,
+sum (case when index = 3 then user_count else 0 end) as t3,
+sum (case when index = 4 then user_count else 0 end) as t4
+from cte2
+group by cohort_month
+order by cohort_month),
+--retention_cohort
+retention_cohort as (
+select cohort_month,
+round (100.00*t1/t1,2)||'%' as t1,
+round (100.00*t2/t1,2)||'%' as t2,
+round (100.00*t3/t1,2)||'%' as t3,
+round (100.00*t4/t1,2)||'%' as t4
+from customer_cohort)
+--churn_cohort
+select cohort_month,
+(100-round (100.00*t1/t1,2))||'%' as t1,
+(100-round (100.00*t2/t1,2))||'%' as t2,
+(100-round (100.00*t3/t1,2))||'%' as t3,
+(100-round (100.00*t4/t1,2))||'%' as t4
+from customer_cohort
+
+--chart in excel: 
