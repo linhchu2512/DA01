@@ -232,4 +232,4 @@ select cohort_month,
 (100-round (100.00*t4/t1,2))||'%' as t4
 from customer_cohort
 
---chart in excel: 
+--chart in excel: https://docs.google.com/spreadsheets/d/e/2PACX-1vRUqbygCJJ4WuxvAPdOyTV1f38LnWzQKXHvxmFzVBwz67rheDdUlstYnASQ5msTZoPJhOUOdMaFVE3k/pubhtml
