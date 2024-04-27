@@ -43,4 +43,27 @@ from cte
 where rank = 1
 
 ----5. Ai là khách hàng tốt nhất, phân tích dựa vào RFM 
-
+--Tính giá trị RFM
+With cte as
+(select customername,
+current_date - max (orderdate) as R,
+count (distinct ordernumber) as F,
+sum (sales) as M
+from public.sales_dataset_rfm_prj_clean
+group by customername),
+--Phân nhóm theo RFM
+cte1 as
+(select customername,
+ ntile (5) over (order by R desc) as R_score,
+ ntile (5) over (order by F) as F_score,
+ ntile (5) over (order by M) as M_score
+ from cte),
+cte2 as
+(select customername,
+cast (R_score as varchar)||cast (F_score as varchar)||cast (M_score as varchar) as RFM_score
+from cte1)
+select a.customername, a.RFM_score
+from cte2 as a
+join public.segment_score as b on a.RFM_score = b.scores
+where segment = 'Champions'
+order by rfm_score desc
